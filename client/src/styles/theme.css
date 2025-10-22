@@ -1,0 +1,99 @@
+:root{
+  --bg-900:#0B0B1A; --text-100:#E6E6F2; --text-60:#B8B8D9;
+  --primary-500:#7C3AED; --primary-600:#6B2EDB;
+  --accent-500:#00D4FF; --surface:#14162bde; --card-border:rgba(255,255,255,.08);
+  --radius-xl:20px; --blur:12px; --shadow-lg:0 20px 60px rgba(124,58,237,.25);
+}
+*{box-sizing:border-box} html,body,#root{height:100%}
+body{
+  margin:0; color:var(--text-100);
+  font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+  background:
+    radial-gradient(1200px 800px at 85% -10%, rgba(124,58,237,.35), transparent 60%),
+    radial-gradient(900px 700px at -10% 10%, rgba(0,212,255,.25), transparent 55%),
+    var(--bg-900);
+}
+.container{width:min(1200px,92%); margin:0 auto}
+.row{display:flex; gap:16px; flex-wrap:wrap}
+.grid{display:grid; gap:16px}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{
+  background:var(--surface); border:1px solid var(--card-border); border-radius:var(--radius-xl);
+  backdrop-filter:blur(var(--blur)); -webkit-backdrop-filter:blur(var(--blur)); padding:18px
+}
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; height:44px; padding:0 18px;
+  border-radius:12px; border:1px solid transparent; color:#fff; text-decoration:none; font-weight:700; cursor:pointer
+}
+.btn-primary{background:linear-gradient(135deg,var(--primary-500),var(--primary-600)); box-shadow:var(--shadow-lg)}
+.btn-ghost{background:rgba(255,255,255,.06); border-color:var(--card-border); color:var(--text-100)}
+
+.nav{
+  position:sticky; top:0; z-index:50; backdrop-filter:blur(10px);
+  background:linear-gradient(180deg, rgba(10,12,25,.75), rgba(10,12,25,.15));
+  border-bottom:1px solid var(--card-border)
+}
+.nav .inner{height:64px; display:flex; align-items:center; justify-content:space-between}
+.brand{display:flex; align-items:center; gap:10px; font-weight:900}
+.brand .dot{width:10px; height:10px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #38E8FF, var(--accent-500))}
+
+/* Footer SIN línea dura (evita “corte” visual) */
+.footer{
+  padding:28px 0; color:var(--text-60);
+  border-top:none;                                /* ← quitamos la línea */
+  box-shadow:0 -1px 0 rgba(255,255,255,.06) inset;/* ← separador sutil opcional */
+  background-clip:padding-box;
+}
+
+.hero{padding:40px 0 10px; display:grid; gap:24px; grid-template-columns:1.15fr .85fr; align-items:center}
+.hero h1{margin:0; font-size:40px}
+.muted{color:var(--text-60)}
+
+@media (max-width:980px){
+  .hero{grid-template-columns:1fr}
+  .grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:600px){
+  .grid-3,.grid-4{grid-template-columns:1fr}
+  .hero h1{font-size:30px}
+}
+
+/* ========= Forms ========= */
+label{ display:block; font-weight:600; margin:10px 0 6px; }
+
+.input{
+  width:100%; height:44px; padding:0 14px; border-radius:12px; border:1px solid var(--card-border);
+  color:var(--text-100); background:rgba(255,255,255,.06); outline:none;
+  transition: box-shadow .2s ease, border-color .2s ease, background .2s ease, transform .05s ease;
+}
+.input::placeholder{ color:var(--text-60); opacity:.85 }
+.input:hover{ background: rgba(255,255,255,.08); }
+.input:focus{
+  border-color: rgba(124,58,237,.55);
+  box-shadow: 0 0 0 2px rgba(124,58,237,.25), 0 0 0 4px rgba(0,212,255,.20);
+  background: rgba(255,255,255,.10);
+}
+.input:disabled{ opacity:.6; cursor:not-allowed; }
+input.input:-webkit-autofill,
+input.input:-webkit-autofill:hover,
+input.input:-webkit-autofill:focus{
+  -webkit-text-fill-color: var(--text-100);
+  -webkit-box-shadow: 0 0 0px 1000px rgba(255,255,255,.06) inset;
+  transition: background-color 9999s ease-out 0s;
+}
+.link{ color: var(--accent-500); text-decoration: none; }
+.link:hover{ text-decoration: underline; }
+
+/* ===== App shell opcional para empujar footer al fondo ===== */
+.app-shell{
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+}
+.app-main{ flex:1; }
+
+/* Continuidad de fondo si hay gradientes de sección */
+body, .app-shell, .app-main{
+  background-color:var(--bg-900);
+}

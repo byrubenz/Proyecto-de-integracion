@@ -1,0 +1,38 @@
+# --- Node/JS generales (aplica a client y server)
+**/node_modules/
+**/dist/
+**/build/
+**/.turbo/
+**/.vite/
+**/.next/
+**/.cache/
+**/*.log
+**/logs/
+
+# --- Env (no subir credenciales)
+# Ignora .env, pero permite ejemplos
+**/.env
+**/.env.local
+**/.env.*.local
+!.env.example
+!client/.env.example
+!server/.env.example
+
+# --- TypeScript / tooling
+**/*.tsbuildinfo
+**/.nyc_output/
+**/coverage/
+
+# --- SO / Editores
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# --- Docs binarios pesados (ajústalo a tu gusto)
+docs/**/*.{pdf,ppt,pptx,doc,docx,xls,xlsx}
+
+# --- SQL (versiona solo esquema/migraciones si quieres)
+sql/**/*.dump
+sql/**/*_backup.sql
