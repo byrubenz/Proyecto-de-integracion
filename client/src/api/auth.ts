@@ -2,7 +2,7 @@ const API = import.meta.env.VITE_API_URL;
 
 export type LoginResponse = {
   token: string;
-  user: { id: number; email: string; name: string; role: string };
+  user: { id: number; email: string; name: string; role: string; is_paid: boolean | number };
 };
 
 // 🔧 versión mejorada: muestra errores reales del backend

@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { fetchProfile, updateProfile, changePassword, type UserProfile } from "../api/profile";
 import AppLayout from "../components/AppLayout";
+import { useAuth } from "../context/AuthContext";
 
 export default function ProfilePage() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
@@ -191,6 +193,31 @@ export default function ProfilePage() {
                 <div style={{ fontWeight: 700 }}>{profile.name}</div>
                 <div className="muted" style={{ fontSize: 14 }}>{profile.email}</div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {user && (
+          <div className="card" style={{ marginTop: 16 }}>
+            <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <div className="muted" style={{ marginBottom: 4 }}>Tu ID de usuario</div>
+                <div style={{ fontWeight: 700, fontSize: 18 }}>#{user.id}</div>
+              </div>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(String(user.id));
+                    toast.success("ID copiado");
+                  } catch {
+                    toast.error("No se pudo copiar");
+                  }
+                }}
+              >
+                Copiar ID
+              </button>
             </div>
           </div>
         )}

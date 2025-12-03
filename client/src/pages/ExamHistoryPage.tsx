@@ -56,7 +56,7 @@ export default function ExamHistoryPage() {
               Revisa tus intentos anteriores, resultados y vuelve a intentarlo.
             </p>
           </div>
-          <Link to="/exams/setup" className="btn btn-primary">Nuevo ensayo</Link>
+          <Link to="/ensayo/nuevo" className="btn btn-primary">Nuevo ensayo</Link>
         </div>
 
         {rows.length === 0 ? (

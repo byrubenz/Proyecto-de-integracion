@@ -9,7 +9,7 @@ export const getProfile = async (req, res) => {
     if (!userId) return res.status(401).json({ error: "No autorizado" });
 
     const [rows] = await pool.query(
-      `SELECT id, name, email, created_at, updated_at
+      `SELECT id, name, email, is_paid, created_at, updated_at
          FROM users
         WHERE id = ?`,
       [userId]
@@ -70,7 +70,7 @@ export const updateProfile = async (req, res) => {
 
     // devolver perfil actualizado
     const [rows] = await pool.query(
-      `SELECT id, name, email, created_at, updated_at FROM users WHERE id = ?`,
+      `SELECT id, name, email, is_paid, created_at, updated_at FROM users WHERE id = ?`,
       [userId]
     );
     return res.json({ ok: true, profile: rows[0] });

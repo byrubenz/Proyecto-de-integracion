@@ -9,6 +9,18 @@ const router = Router();
 // ✅ lee el secreto/expiración SOLO cuando se usan (evita timing issues con dotenv)
 const getSecret = () => (process.env.JWT_SECRET ?? "").trim();
 const getExpires = () => process.env.JWT_EXPIRES || "7d";
+const mapUserRow = (row) => {
+  const paid = row?.is_paid;
+  const isPaid = paid === true || paid === 1 || paid === "1";
+  return {
+    id: row.id,
+    email: row.email,
+    name: row.name,
+    role: row.role,
+    is_paid: isPaid,
+    created_at: row.created_at,
+  };
+};
 
 // ==========================
 // POST /api/auth/register
@@ -53,7 +65,7 @@ router.post("/auth/login", async (req, res) => {
     }
 
     const [rows] = await pool.query(
-      "SELECT id, email, password_hash, name, role FROM users WHERE email = ?",
+      "SELECT id, email, password_hash, name, role, is_paid, created_at FROM users WHERE email = ?",
       [email]
     );
     const user = rows[0];
@@ -62,15 +74,22 @@ router.post("/auth/login", async (req, res) => {
     const ok = await bcrypt.compare(password, user.password_hash);
     if (!ok) return res.status(401).json({ error: "Credenciales inválidas" });
 
+    const publicUser = mapUserRow(user);
     const token = jwt.sign(
-      { id: user.id, email: user.email, name: user.name, role: user.role },
+      {
+        id: publicUser.id,
+        email: publicUser.email,
+        name: publicUser.name,
+        role: publicUser.role,
+        is_paid: publicUser.is_paid,
+      },
       SECRET,
       { expiresIn: getExpires() }
     );
 
     return res.json({
       token,
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      user: publicUser,
     });
   } catch (err) {
     console.error("login error:", err?.message, err?.stack);
@@ -85,13 +104,17 @@ router.get("/auth/me", requireAuth, async (req, res) => {
   try {
     const userId = req.user?.id;
     const [rows] = await pool.query(
-      "SELECT id, email, name, role, created_at FROM users WHERE id = ?",
+      "SELECT id, email, name, role, is_paid, created_at FROM users WHERE id = ?",
       [userId]
     );
     const user = rows[0];
     if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+    const publicUser = mapUserRow(user);
 
-    return res.json({ ok: true, user });
+    return res.json({
+      ok: true,
+      user: publicUser,
+    });
   } catch (err) {
     console.error("auth/me error:", err);
     return res.status(500).json({ error: "Error al obtener datos del usuario" });
@@ -119,6 +142,7 @@ router.get("/auth/renew", requireAuth, (req, res) => {
       email: req.user.email,
       name: req.user.name,
       role: req.user.role,
+      is_paid: Boolean(Number(req.user.is_paid)),
     };
     const token = jwt.sign(payload, SECRET, { expiresIn: getExpires() });
     return res.json({ ok: true, token, user: payload });

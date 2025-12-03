@@ -2,11 +2,13 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 // Tipos
-type User = { id: number; email: string; name: string; role: string };
+type User = { id: number; email: string; name: string; role: string; is_paid: boolean | number };
+type RawUser = User | (Omit<User, "is_paid"> & { is_paid?: boolean | number | string });
+type AuthLoginPayload = { token: string; user: RawUser };
 type AuthContextType = {
   user: User | null;
   token: string | null;
-  login: (data: { token: string; user: User }) => void;
+  login: (data: AuthLoginPayload) => void;
   logout: () => void;
 };
 
@@ -30,6 +32,12 @@ function isExpired(token: string | null) {
   return payload.exp <= now;
 }
 
+function normalizeUser(user: RawUser): User {
+  const paid = (user as any)?.is_paid;
+  const isPaid = paid === true || paid === 1 || paid === "1";
+  return { ...(user as any), is_paid: isPaid };
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -42,7 +50,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const u = localStorage.getItem("auth_user");
     if (t && u && !isExpired(t)) {
       setToken(t);
-      setUser(JSON.parse(u));
+      const parsed = JSON.parse(u);
+      setUser(normalizeUser(parsed));
     } else {
       // Si no hay token o expiró, limpiar por si acaso
       localStorage.removeItem("auth_token");
@@ -50,11 +59,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const login = (data: { token: string; user: User }) => {
+  const login = (data: AuthLoginPayload) => {
+    const normalizedUser = normalizeUser(data.user);
     setToken(data.token);
-    setUser(data.user);
+    setUser(normalizedUser);
     localStorage.setItem("auth_token", data.token);
-    localStorage.setItem("auth_user", JSON.stringify(data.user));
+    localStorage.setItem("auth_user", JSON.stringify(normalizedUser));
   };
 
   const logout = () => {

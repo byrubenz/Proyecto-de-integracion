@@ -2,50 +2,48 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { login, saveSession } from "../api/auth";
+import { login } from "../api/auth";
 import AppLayout from "../components/AppLayout";
+import { useAuth } from "../context/AuthContext";
 
-/**
- * Vista de Login.
- * - Envía datos reales al backend
- * - Guarda token y usuario
- * - Redirige al Dashboard tras login exitoso
- * - 🔄 Si existe `post_login_redirect`, vuelve a esa ruta tras iniciar sesión
- */
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login: setSession } = useAuth();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     try {
       setLoading(true);
+
       const data = await login(email, password);
 
-      // Guardar sesión
-      saveSession(data);
+      // normalizamos is_paid (0/1, "0"/"1", boolean, etc.)
+      const rawPaid = (data.user as any).is_paid;
+      const isPaid = rawPaid === true || rawPaid === 1 || rawPaid === "1";
 
-      // 🔄 Volver a la ruta que el usuario intentaba visitar antes de loguearse
-      const backTo = sessionStorage.getItem("post_login_redirect");
-      if (backTo) {
-        sessionStorage.removeItem("post_login_redirect");
-        toast.success(`Bienvenido, ${data.user.name}`);
-        navigate(backTo, { replace: true });
-        // fuerza refresco para que la navbar y el estado reflejen el login
-        setTimeout(() => window.location.reload(), 0);
-        return;
+      const normalizedUser = { ...data.user, is_paid: isPaid };
+      // guardamos en el contexto
+      setSession({ ...data, user: normalizedUser } as any);
+
+      // 🔹 redirección según rol + pago
+      if (normalizedUser.role === "admin") {
+        navigate("/admin", { replace: true });
+      } else if (normalizedUser.role === "student" && normalizedUser.is_paid) {
+        navigate("/inicio", { replace: true });
+      } else {
+        // student sin pago → landing
+        navigate("/", { replace: true });
       }
 
-      // ✅ Ir al Dashboard y refrescar UI
-      toast.success(`Bienvenido, ${data.user.name}`);
-      navigate("/", { replace: true });
-      setTimeout(() => window.location.reload(), 0);
+      toast.success(`Bienvenido, ${normalizedUser.name}`);
+      // ⚠️ IMPORTANTE: NADA DE window.location.reload()
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Error desconocido";
-      console.error("❌ Error al iniciar sesión:", msg);
+      console.error("Error al iniciar sesión:", msg);
       toast.error(msg);
     } finally {
       setLoading(false);
